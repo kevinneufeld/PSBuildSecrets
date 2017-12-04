@@ -64,7 +64,7 @@ task test {
 		# In Appveyor?  Upload our tests! #Abstract this into a function?
 		If($ENV:BHBuildSystem -eq 'AppVeyor')
 		{
-			 $Results = Get-ChildItem $ENV:BHTestResultTargetPath -Filter '*.xml'
+			 $Results = Get-ChildItem $TestResults -Filter '*.xml'
 			 
 			 foreach ($Result in $Results) { 
 				(New-Object 'System.Net.WebClient').UploadFile(
@@ -113,7 +113,7 @@ task build {
 		Write-Build -Color Green "Setting [FunctionsToExport] to [$FunctionToExportString]"
 		$NewModuleManifestContent = $ModuleManifestContent -replace '^(FunctionsToExport =).*', "`$1 $FunctionToExportString"
 		Write-Build -Color Green "Setting [ModuleVersion] to [$env:APPVEYOR_BUILD_VERSION]"
-		$NewModuleManifestContent = $ModuleManifestContent -replace '^(ModuleVersion =).*', "`$1 $env:APPVEYOR_BUILD_VERSION"
+		$NewModuleManifestContent = $ModuleManifestContent -replace '^(ModuleVersion =).*', "`$1 '$env:APPVEYOR_BUILD_VERSION'"
 	
 		$NewModuleManifestContent | Set-Content $ManifestPath
 
