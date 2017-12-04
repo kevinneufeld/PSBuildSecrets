@@ -18,6 +18,8 @@ branches:
 skip_commits:
   message: /updated readme.*|update readme.*s/
 
+build: false
+
 #Kick off the CI/CD pipeline
-build:
+test_script:
   - ps: .\Build\Invoke-Build.ps1
