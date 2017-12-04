@@ -51,8 +51,8 @@
      
  
      } Catch {
-             Write-Error "Can't get PSDepend `n$($_)"
-             Throw "$($_.Exception.Message)"
+             Write-Output "Can't get PSDepend `n$($_)"
+             Throw $_
  
      }
  }
@@ -76,6 +76,15 @@ if (-not (Test-Path -PathType Container -Path $ENV:BHWorkingDirPath)) {
 # Create Dependencies folder
 if (-not (Test-Path -PathType Container -Path $Env:BHDependenciesFolderPath)) {
     New-Item -Path $Env:BHDependenciesFolderPath -ItemType Container -Force | Out-Null               
+}
+
+Write-Build -Color Green "Listing build environment:"
+Get-Childitem -Path Env:BH* | Sort-Object -Property Name
+
+# In Appveyor? Show Appveyor environment
+If($ENV:BHBuildSystem -eq 'AppVeyor')
+{
+    Get-ChildItem -Path Env:APPVEYOR_* | Sort-Object -Property Name
 }
     
 # Installs and Loads PSDepend
