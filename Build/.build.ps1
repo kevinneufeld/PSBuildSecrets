@@ -110,8 +110,10 @@ task build {
 		Write-Build -Color Green "Getting content of [$ManifestPath]"
 		$ModuleManifestContent = Get-Content $ManifestPath
 
-		Write-Build -Color Green "Seting [FunctionsToExport] to [$FunctionToExportString]"
+		Write-Build -Color Green "Setting [FunctionsToExport] to [$FunctionToExportString]"
 		$NewModuleManifestContent = $ModuleManifestContent -replace '^(FunctionsToExport =).*', "`$1 $FunctionToExportString"
+		Write-Build -Color Green "Setting [ModuleVersion] to [$env:APPVEYOR_BUILD_VERSION]"
+		$NewModuleManifestContent = $ModuleManifestContent -replace '^(ModuleVersion =).*', "`$1 $env:APPVEYOR_BUILD_VERSION"
 	
 		$NewModuleManifestContent | Set-Content $ManifestPath
 
