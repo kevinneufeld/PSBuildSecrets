@@ -22,5 +22,5 @@ skip_commits:
 build: false
 
 #Kick off the CI/CD pipeline
-test_script:
-- ps: . .\Build\Invoke-Build.ps1
+build:
+  - ps: .\Build\Invoke-Build.ps1
