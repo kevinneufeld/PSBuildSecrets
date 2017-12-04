@@ -64,7 +64,7 @@ task test {
 		# In Appveyor?  Upload our tests! #Abstract this into a function?
 		If($ENV:BHBuildSystem -eq 'AppVeyor')
 		{
-			 $Results = Get-ChildItems $TestResults -Filter '*.xml'
+			 $Results = Get-ChildItem $TestResults -Filter '*.xml'
 			 
 			 foreach ($Result in $Results) { 
 				(New-Object 'System.Net.WebClient').UploadFile(
