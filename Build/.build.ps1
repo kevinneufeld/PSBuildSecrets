@@ -42,6 +42,12 @@ task init {
 	Write-Build -Color Green "Listing build environment:"
 	Get-Childitem -Path Env:BH* | Sort-Object -Property Name
 
+	# In Appveyor? Show Appveyor environment
+    If($ENV:BHBuildSystem -eq 'AppVeyor')
+    {
+        Get-ChildItem -Path Env:APPVEYOR_* | Sort-Object -Property Name
+    }
+
 }
 
 # Synopsis: Runs test cases against the environment
@@ -54,13 +60,25 @@ task test {
 	
 		# Gather test results. Store them in a variable and file
 		$TestResults = Invoke-Pester -Path $ENV:BHProjectRoot\Tests -PassThru -OutputFormat NUnitXml -OutputFile (Join-Path $ENV:BHTestResultTargetPath $ENV:BHTestFile)
+
+		# In Appveyor?  Upload our tests! #Abstract this into a function?
+		If($ENV:BHBuildSystem -eq 'AppVeyor')
+		{
+			 $Results = Get-ChildItems $TestResults -Filter '*.xml'
+			 
+			 foreach ($Result in $Results) { 
+				(New-Object 'System.Net.WebClient').UploadFile(
+					"https://ci.appveyor.com/api/testresults/nunit/$($env:APPVEYOR_JOB_ID)",
+					$Result.FullName )
+			 }
+		}
 	
 		# Failed tests?
 		# Need to tell psake or it will proceed to the deployment. Danger!
 		if($TestResults.FailedCount -gt 0)
 		{
 			Throw "Failed '$($TestResults.FailedCount)' tests, build failed"
-		}
+		} 
 	
 	}
 
