@@ -7,10 +7,17 @@ environment:
 # Allow WMF5 (i.e. PowerShellGallery functionality)
 os: WMF 5
 
+# branches to build
+branches:
+  # whitelist
+  only:
+    - master
+
 # Skip on updates to the readme.
 # We can force this by adding [skip ci] or [ci skip] anywhere in commit message 
 skip_commits:
 message: /updated readme.*|update readme.*s/
+
 
 build: false
 
