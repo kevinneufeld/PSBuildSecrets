@@ -1,38 +1,49 @@
-# PSBuildEnvironment
-This module uses Azure Key Vault to securely store environment variables and load them whenever and wherever needed.
+# PSBuildSecrets
+This module uses Azure Key Vault to securely store secrets and allows you to set them as encironment variables using a single command.
+
+![Build status](https://ci.appveyor.com/api/projects/status/cgo827o4f74lmf9w/branch/master?svg=true)
+
 
 # How to use
 
-# Create a new key vault
+## Install Modules
+First we need to install all required modules:
+```Powershell
+    # Open an elevated powershell prompt (you could also install it in user scope)
+    Install-Module PSBuildSecrets,AzureRM
+```
+
+## Setup Secrets in Azure
+First you need to create a key vault in azure and store some secrets. The following example shows how to create two key vaults, one called "prod" the other one "staging".
+
 ```powershell
 # Login to azure
 Login-AzureRmAccount
 
-# Create a new resource group for your environments (Or use an existing group)
-New-AzureRmResourceGroup -Name 'BuildEnvironments' -Location northeurope
+# Create a new resource group for your build secrets (Or use an existing group)
+New-AzureRmResourceGroup -Name 'BuildSecrets' -Location northeurope
 
-# Create the key vault
-New-AzureRmKeyVault -VaultName 'staging' -ResourceGroupName 'BuildEnvironments' -Location 'northeurope'
+# Create the key vault for staging
+New-AzureRmKeyVault -VaultName 'staging' -ResourceGroupName 'BuildSecrets' -Location 'northeurope'
 
-# Set the secrets for your build environment
+# Set the secrets for the staging build environment
+Set-AzureKeyVaultSecret -VaultName 'BuildSecrets' -Name 'MySecret1' -SecretValue (ConvertTo-SecureString -String 'MySecretValue1' -AsPlainText -Force) -Tag @{ 'build-environment' = $EnvironmentName }
 
-Set-AzureKeyVaultSecret -VaultName 'BuildEnvironments' -Name 'MySecret1' -SecretValue (ConvertTo-SecureString -String 'MySecretValue1' -AsPlainText -Force) -Tag @{ 'build-environment' = $EnvironmentName }
+Set-AzureKeyVaultSecret -VaultName 'BuildSecrets' -Name 'MySecret2' -SecretValue (ConvertTo-SecureString -String 'MySecretValue2' -AsPlainText -Force) -Tag @{ 'build-environment' = $EnvironmentName }
 
-Set-AzureKeyVaultSecret -VaultName 'BuildEnvironments' -Name 'MySecret2' -SecretValue (ConvertTo-SecureString -String 'MySecretValue2' -AsPlainText -Force) -Tag @{ 'build-environment' = $EnvironmentName }
+# Create the key vault fpr prod
+New-AzureRmKeyVault -VaultName 'prod' -ResourceGroupName 'BuildSecrets' -Location 'northeurope'
 
-# Create the key vault
-New-AzureRmKeyVault -VaultName 'prod' -ResourceGroupName 'BuildEnvironments' -Location 'northeurope'
+# Set the secrets for the prod build environment
+Set-AzureKeyVaultSecret -VaultName 'BuildSecrets' -Name 'MySecret1' -SecretValue (ConvertTo-SecureString -String 'MySecretValue1' -AsPlainText -Force) -Tag @{ 'build-environment' = $EnvironmentName }
 
-Set-AzureKeyVaultSecret -VaultName 'BuildEnvironments' -Name 'MySecret1' -SecretValue (ConvertTo-SecureString -String 'MySecretValue1' -AsPlainText -Force) -Tag @{ 'build-environment' = $EnvironmentName }
-
-Set-AzureKeyVaultSecret -VaultName 'BuildEnvironments' -Name 'MySecret2' -SecretValue (ConvertTo-SecureString -String 'MySecretValue2' -AsPlainText -Force) -Tag @{ 'build-environment' = $EnvironmentName }
+Set-AzureKeyVaultSecret -VaultName 'BuildSecrets' -Name 'MySecret2' -SecretValue (ConvertTo-SecureString -String 'MySecretValue2' -AsPlainText -Force) -Tag @{ 'build-environment' = $EnvironmentName }
 
 
 ```
 
 ## ToDo
-- Remove dependency on AzureRM (Cross Platform support)
-- Add Tag support for multi environment support per key vault
+- Use Powershell Core and remove dependency on AzureRM (Cross Platform support)
 
 ## Credits
 

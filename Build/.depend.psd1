@@ -7,8 +7,14 @@
     }
 
   # Powershell Modules
- 
+
     'powershell-yaml' = 'latest'
-    Pester   = 'latest'  
     BuildHelpers = 'latest'
+
+
+  # File
+   nuget = @{
+        DependencyType = 'FileDownload'
+        Source = 'https://nuget.org/nuget.exe'
+    }
 }

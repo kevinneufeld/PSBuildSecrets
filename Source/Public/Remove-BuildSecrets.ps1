@@ -1,10 +1,10 @@
-function Remove-BuildEnvironment {
+function Remove-BuildSecrets {
     <#
 .SYNOPSIS
     Removes all variables of the current build environment
 #>
 
-    foreach ($Variable in $BuildEnvironment) {
+    foreach ($Variable in $BuildSecrets) {
         Remove-Item -Path ENV:$Variable -Force
     }    
 

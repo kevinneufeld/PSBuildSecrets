@@ -16,7 +16,7 @@
         [Parameter(Mandatory=$true, Position=1)]
         [String]$Path,
         [Parameter(Mandatory=$false, Position=2)]
-        [String]$Prefix=""
+        [String]$Prefix="BH"
     )
 
     try {
@@ -26,7 +26,7 @@
         $VariableProperties = Get-Member -InputObject $VariablesJson -Type NoteProperty
     
         foreach ($VariableProperty in $VariableProperties) {                
-                New-Item -Path Env:$Prefix$($VariableProperty.Name) -Value $($VariablesJson.$($VariableProperty.Name)) -Force
+                New-Item -Path Env:$Prefix$($VariableProperty.Name) -Value $($VariablesJson.$($VariableProperty.Name)) -Force | Out-Null    
         }
 
     } Catch {
@@ -59,24 +59,24 @@
 
 
 # Sets some environment variables required for the build.
-New-Item -Path Env:SRBBuildRoot -Value $PSScriptRoot -Force
-New-Item -Path Env:SRBProjectRoot -Value $((Get-Item $PSScriptRoot).Parent.FullName) -Force  
+New-Item -Path Env:BHBuildRoot -Value $PSScriptRoot -Force | Out-Null
+New-Item -Path Env:BHProjectRoot -Value $((Get-Item $PSScriptRoot).Parent.FullName) -Force | Out-Null
 
-Set-SRVariablesFromJson -Path (Join-Path $Env:SRBBuildRoot 'variables.json')
+Set-SRVariablesFromJson -Path (Join-Path $Env:BHBuildRoot 'variables.json')
 
-New-Item -Path Env:SRBWorkingDirPath -Value (Join-Path $Env:SRBProjectRoot $ENV:SRBWorkingDir) -Force          
+New-Item -Path Env:BHWorkingDirPath -Value (Join-Path $Env:BHProjectRoot $ENV:BHWorkingDir) -Force | Out-Null          
 
 # Create Dependency Target Path for dependency download
-New-Item -Path Env:SRBDependenciesFolderPath -Value (Join-Path $ENV:SRBWorkingDirPath $ENV:SRBDependenciesFolderName) -Force
+New-Item -Path Env:BHDependenciesFolderPath -Value (Join-Path $ENV:BHWorkingDirPath $ENV:BHDependenciesFolderName) -Force | Out-Null
 
-if (-not (Test-Path -PathType Container -Path $ENV:SRBWorkingDirPath)) {
-    New-Item -Path $Env:SRBWorkingDirPath -ItemType Container -Force               
+if (-not (Test-Path -PathType Container -Path $ENV:BHWorkingDirPath)) {
+    New-Item -Path $Env:BHWorkingDirPath -ItemType Container -Force | Out-Null              
 }
 
 # Create Dependencies folder
-if (-not (Test-Path -PathType Container -Path $Env:SRBDependenciesFolderPath)) {
-    New-Item -Path $Env:SRBDependenciesFolderPath -ItemType Container -Force               
+if (-not (Test-Path -PathType Container -Path $Env:BHDependenciesFolderPath)) {
+    New-Item -Path $Env:BHDependenciesFolderPath -ItemType Container -Force | Out-Null               
 }
     
 # Installs and Loads PSDepend
-Get-PSDepend -Target $Env:SRBDependenciesFolderPath
+Get-PSDepend -Target $Env:BHDependenciesFolderPath
