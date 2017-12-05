@@ -33,7 +33,7 @@ Author = 'Stefan Henseler'
 CompanyName = 'Synax'
 
 # Copyright statement for this module
-Copyright = 'Copyright 2017, Stefan Henseler and the PSBuildEnvironment contributors'
+Copyright = 'Copyright 2017, Stefan Henseler and the PSBuildSecrets contributors'
 
 # Description of the functionality provided by this module
 Description = 'This module contains helper functions for build automation variable setup using azure key vault.'
