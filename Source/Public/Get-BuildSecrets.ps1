@@ -1,34 +1,38 @@
 function Get-BuildSecrets {
     <#
 .SYNOPSIS
-    Gets all variables which are currently set
+    Gets all secrets in the current environment
 .PARAMETER KeyVaultName
-    The name if the key vault 
+    The name of the key vault containing the environment
+.PARAMETER SubscriptionID
+    Allows the user to specify a subscription id if required.     
 #>
+
+[CmdletBinding()]
 param (
+    [Parameter(Mandatory=$true,Position=1)]
+    [String]$KeyVaultName,
     [Parameter(Mandatory=$false)]
-    [Switch]$KeyVaultName
+    [String]$SubscriptionID
 )
 
-    # This would set all secrets of a vault as environment variables. 
+    # Select the appropriate subscription
+    if ($SubscriptionID) {
+        Select-AzureRmSubscription -SubscriptionId $SubscriptionID 
+    }
+
+    # Get all secrets from the specified key vault
     $Secrets = Get-AzureKeyVaultSecret -VaultName $KeyVaultName | Select-Object -ExpandProperty Name   
 
-    foreach ($Secret in $Secrets) {      
-      
+    foreach ($Secret in $Secrets) { 
 
-        # Set Environment Variable
-        New-Item -Path Env:$Secret -Value $SecretValue.SecretValueText -Force
-    }
-
-
-    if ($ListValues) {
-        foreach ($Variable in $BuildSecrets) {
-            Get-Item -Path ENV:$Variable
+        try {
+            # Set Environment Variable
+            Get-Item -Path Env:$Secret 
+        } catch {
+            Write-Output "Could not find secret [$Secret] in current environment"
         }
+ 
     }
-    else {
-        Write-Output $BuildSecrets
-    }
-
    
 }
