@@ -5,7 +5,7 @@ function Get-BuildSecrets {
 .PARAMETER KeyVaultName
     The name of the key vault containing the environment
 .PARAMETER SubscriptionID
-    Allows the user to specify a subscription id if required.     
+    Allows the user to specify a subscription id if required. if not specified, the default subscription will be used.
 #>
 
 [CmdletBinding()]
