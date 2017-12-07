@@ -43,6 +43,12 @@ Set-AzureKeyVaultSecret -VaultName $EnvironmentName -Name 'MySecret1' -SecretVal
 
 Set-AzureKeyVaultSecret -VaultName $EnvironmentName -Name 'MySecret2' -SecretValue (ConvertTo-SecureString -String 'MySecretValue2' -AsPlainText -Force) -Tag @{ 'build-environment' = $EnvironmentName }
 
+# Install the PSBuildSecrets Module
+Install-Module BuildSecrets
+
+# Set Build Secrets for myenvironment-prod
+
+
 
 ```
 

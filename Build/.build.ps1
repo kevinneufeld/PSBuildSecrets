@@ -112,9 +112,13 @@ task build {
 
 		Write-Build -Color Green "Setting [FunctionsToExport] to [$FunctionToExportString]"
 		$NewModuleManifestContent = $ModuleManifestContent -replace '^(FunctionsToExport =).*', "`$1 $FunctionToExportString"
-		Write-Build -Color Green "Setting [ModuleVersion] to [$env:APPVEYOR_BUILD_VERSION]"
-		$NewModuleManifestContent = $ModuleManifestContent -replace '^(ModuleVersion =).*', "`$1 '$env:APPVEYOR_BUILD_VERSION'"
-	
+		
+		If ($ENV:BHBuildSystem -eq 'AppVeyor') { 
+			Write-Build -Color Green "Setting [ModuleVersion] to [$env:APPVEYOR_BUILD_VERSION]"
+			$NewModuleManifestContent = $ModuleManifestContent -replace '^(ModuleVersion =).*', "`$1 '$env:APPVEYOR_BUILD_VERSION'"
+		
+		}
+		
 		$NewModuleManifestContent | Set-Content $ManifestPath
 
 		# We have to create a local folder for the local repository
@@ -141,9 +145,10 @@ task build {
 }
 
 task deploy {
-
-	Publish-Module -Path $ENV:BHModuleRootPath -Repository PSGallery -Verbose -NuGetApiKey $Env:NugetApiKey
-
+	# We only deploy via appveyor
+	If ($ENV:BHBuildSystem -eq 'AppVeyor') { 
+		Publish-Module -Path $ENV:BHModuleRootPath -Repository PSGallery -Verbose -NuGetApiKey $Env:NugetApiKey
+	}
 }
 
 # Synopsis: Remove temporary files.
