@@ -24,7 +24,9 @@ Login-AzureRmAccount
 New-AzureRmResourceGroup -Name 'BuildSecrets' -Location northeurope
 
 # Create the key vault for staging
-New-AzureRmKeyVault -VaultName 'staging' -ResourceGroupName 'BuildSecrets' -Location 'northeurope'
+$EnvironmentName = 'prod'
+
+New-AzureRmKeyVault -VaultName $EnvironmentName -ResourceGroupName 'BuildSecrets' -Location 'northeurope'
 
 # Set the secrets for the staging build environment
 Set-AzureKeyVaultSecret -VaultName 'BuildSecrets' -Name 'MySecret1' -SecretValue (ConvertTo-SecureString -String 'MySecretValue1' -AsPlainText -Force) -Tag @{ 'build-environment' = $EnvironmentName }
@@ -32,7 +34,9 @@ Set-AzureKeyVaultSecret -VaultName 'BuildSecrets' -Name 'MySecret1' -SecretValue
 Set-AzureKeyVaultSecret -VaultName 'BuildSecrets' -Name 'MySecret2' -SecretValue (ConvertTo-SecureString -String 'MySecretValue2' -AsPlainText -Force) -Tag @{ 'build-environment' = $EnvironmentName }
 
 # Create the key vault fpr prod
-New-AzureRmKeyVault -VaultName 'prod' -ResourceGroupName 'BuildSecrets' -Location 'northeurope'
+$EnvironmentName = 'prod'
+
+New-AzureRmKeyVault -VaultName $EnvironmentName -ResourceGroupName 'BuildSecrets' -Location 'northeurope'
 
 # Set the secrets for the prod build environment
 Set-AzureKeyVaultSecret -VaultName 'BuildSecrets' -Name 'MySecret1' -SecretValue (ConvertTo-SecureString -String 'MySecretValue1' -AsPlainText -Force) -Tag @{ 'build-environment' = $EnvironmentName }
