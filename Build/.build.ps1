@@ -147,9 +147,9 @@ task build {
 task deploy {
 	# We only deploy via appveyor
 	If ($ENV:BHBuildSystem -eq 'AppVeyor') { 
-		Publish-Module -Name $Env:BHModuleName -Repository PSGallery -Verbose -NuGetApiKey $Env:NugetApiKey
+		Publish-Module -Name $Env:BHModuleName -Repository PSGallery -Verbose -NuGetApiKey $Env:NugetApiKey -Tags 'Azure','KeyVault','Secrets','Build' -ProjectUri 'https://github.com/synax/PSBuildSecrets/blob/master/LICENSE' -LicenseUri 'https://github.com/synax/PSBuildSecrets/blob/master/LICENSE'
 	}
-	
+
 }
 
 # Synopsis: Remove temporary files.

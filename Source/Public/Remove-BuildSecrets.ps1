@@ -21,10 +21,10 @@ param (
         Select-AzureRmSubscription -SubscriptionId $SubscriptionID 
     }
 
+    # Get all secrets from specified vault's
     $Secrets = @()
     
     foreach ($Name in $KeyVaultName) { 
-        # This would set all secrets of a vault as environment variables. 
         $Secrets += Get-AzureKeyVaultSecret -VaultName $KeyVaultName | Select-Object -ExpandProperty Name           
     }
 
