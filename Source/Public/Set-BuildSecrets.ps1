@@ -17,7 +17,7 @@ function Set-BuildSecrets {
     [CmdletBinding()]
     param (
         [Parameter(Mandatory=$true)]
-        [String]$KeyVaultName,
+        [String[]]$KeyVaultName,
         [Parameter(Mandatory=$false)]
         [String]$SubscriptionID,
         [Parameter(Mandatory=$false)]
@@ -31,9 +31,18 @@ function Set-BuildSecrets {
     Process {
 
         try {         
-                     
-            # This would set all secrets of a vault as environment variables. 
-            $Secrets = Get-AzureKeyVaultSecret -VaultName $KeyVaultName | Where-Object -Property Tags -In $Tag | Select-Object -ExpandProperty Name           
+
+            # Select the appropriate subscription
+            if ($SubscriptionID) {
+                Select-AzureRmSubscription -SubscriptionId $SubscriptionID 
+            }
+
+            # Get all secrets from specified vault's
+            $Secrets = @()
+            
+            foreach ($Name in $KeyVaultName) { 
+                $Secrets += Get-AzureKeyVaultSecret -VaultName $KeyVaultName | Select-Object -ExpandProperty Name           
+            }
                        
             foreach ($Secret in $Secrets) {  
         
@@ -49,9 +58,8 @@ function Set-BuildSecrets {
                }    
 
             }
-
              # Store the secret names of the environment which is being loaded.
-             $Script:BuildEnvironment += $KeyVaultName
+             $Script:Vaults += $KeyVaultName
 
         } Catch {              
             Throw "$($_.Exception.Message)"

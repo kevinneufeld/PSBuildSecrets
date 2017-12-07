@@ -47,7 +47,7 @@ Set-AzureKeyVaultSecret -VaultName $EnvironmentName -Name 'MySecret2' -SecretVal
 Install-Module BuildSecrets
 
 # Set Build Secrets for myenvironment-prod
-
+Set-BuildSecrets 'myenvironment-prod'
 
 
 ```

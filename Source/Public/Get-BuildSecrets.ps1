@@ -10,8 +10,8 @@ function Get-BuildSecrets {
 
 [CmdletBinding()]
 param (
-    [Parameter(Mandatory=$true,Position=1)]
-    [String]$KeyVaultName,
+    [Parameter(Mandatory=$false,Position=1)]
+    [String[]]$KeyVaultName,
     [Parameter(Mandatory=$false)]
     [String]$SubscriptionID
 )
@@ -21,8 +21,17 @@ param (
         Select-AzureRmSubscription -SubscriptionId $SubscriptionID 
     }
 
-    # Get all secrets from the specified key vault
-    $Secrets = Get-AzureKeyVaultSecret -VaultName $KeyVaultName | Select-Object -ExpandProperty Name   
+    # Get all secrets from specified vault's
+    $Secrets = @()
+
+    # If no key vault is specified, we just list the vaults already loaded
+    if (-not $KeyVaultName) {
+        $KeyVaultName = $Script:Vaults
+    }
+
+    foreach ($Name in $KeyVaultName) { 
+        $Secrets += Get-AzureKeyVaultSecret -VaultName $KeyVaultName | Select-Object -ExpandProperty Name           
+    }
 
     foreach ($Secret in $Secrets) { 
 

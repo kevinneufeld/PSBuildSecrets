@@ -11,7 +11,7 @@ function Remove-BuildSecrets {
 [CmdletBinding()]
 param (
     [Parameter(Mandatory=$true,Position=1)]
-    [String]$KeyVaultName,
+    [String[]]$KeyVaultName,
     [Parameter(Mandatory=$false)]
     [String]$SubscriptionID
 )
@@ -21,8 +21,12 @@ param (
         Select-AzureRmSubscription -SubscriptionId $SubscriptionID 
     }
 
-      # Get all secrets from the specified key vault 
-    $Secrets = Get-AzureKeyVaultSecret -VaultName $KeyVaultName | Select-Object -ExpandProperty Name   
+    $Secrets = @()
+    
+    foreach ($Name in $KeyVaultName) { 
+        # This would set all secrets of a vault as environment variables. 
+        $Secrets += Get-AzureKeyVaultSecret -VaultName $KeyVaultName | Select-Object -ExpandProperty Name           
+    }
 
     foreach ($Secret in $Secrets) { 
 

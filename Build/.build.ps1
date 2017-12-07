@@ -147,8 +147,9 @@ task build {
 task deploy {
 	# We only deploy via appveyor
 	If ($ENV:BHBuildSystem -eq 'AppVeyor') { 
-		Publish-Module -Path $ENV:BHModuleRootPath -Repository PSGallery -Verbose -NuGetApiKey $Env:NugetApiKey
+		Publish-Module -Name $Env:BHModuleName -Repository PSGallery -Verbose -NuGetApiKey $Env:NugetApiKey
 	}
+	
 }
 
 # Synopsis: Remove temporary files.

@@ -101,13 +101,13 @@ PrivateData = @{
     PSData = @{
 
         # Tags applied to this module. These help with module discovery in online galleries.
-        # Tags = @()
+        Tags = 'Azure','KeyVault','Secrets','Build'
 
         # A URL to the license for this module.
-        # LicenseUri = ''
+        LicenseUri = 'https://github.com/synax/PSBuildSecrets/blob/master/LICENSE'
 
         # A URL to the main website for this project.
-        # ProjectUri = ''
+        ProjectUri = 'https://github.com/synax/PSBuildSecrets'
 
         # A URL to an icon representing this module.
         # IconUri = ''
