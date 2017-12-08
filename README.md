@@ -127,6 +127,7 @@ my-secret-6                    mysecretvalue
 ## ToDo
 - Add support for certificates and keys
 - Add usage examples to help
+- Add support for other backends using providers
 - Improve exception handling
 
 ## Credits
