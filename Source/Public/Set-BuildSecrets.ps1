@@ -24,47 +24,41 @@ function Set-BuildSecrets {
         [Switch]$UseSecureString
     )    
 
-    try {         
+       
 
-        # Select the appropriate subscription
-        if ($SubscriptionID) {
-            Invoke-Azcli -Arguments "account set -s $SubscriptionID"
-        }
+    # Select the appropriate subscription
+    if ($SubscriptionID) {
+        Invoke-Azcli -Arguments "account set -s $SubscriptionID"
+    }
 
-        # Get all secrets from specified vault's
-        foreach ($Name in $KeyVaultName) {
+    # Get all secrets from specified vault's
+    foreach ($Name in $KeyVaultName) {
 
-            Write-Verbose "Adding Secrets from Vault [$Name]"
+        Write-Verbose "Adding Secrets from Vault [$Name]"
 
-            $Secrets = Invoke-Azcli -Arguments "keyvault secret list --vault-name $Name" | ForEach-Object { Split-Path $_.id -Leaf }          
-                
-            foreach ($Secret in $Secrets) {  
+        $Secrets = Invoke-Azcli -Arguments "keyvault secret list --vault-name $Name" | ForEach-Object { Split-Path $_.id -Leaf }          
+        
+        foreach ($Secret in $Secrets) {  
                     
-                # We get the secret from azure key vault
-                $SecretValue = Invoke-Azcli -Arguments "keyvault secret show --name $Secret --vault-name $Name" | Select-Object -ExpandProperty 'value'
+            # We get the secret from azure key vault
+            $SecretValue = Invoke-Azcli -Arguments "keyvault secret show --name $Secret --vault-name $Name" | Select-Object -ExpandProperty 'value'
 
-                if ($UseSecureString) {
-                    # Set Environment Variable using clear text
-                    New-Item -Path Env:$Secret -Value (ConvertTo-SecureString -AsPlainText -Force -String $SecretValue ) -Force | Out-Null
-                }
-                else {
-                    # Set Environment Variable using secure string
-                    New-Item -Path Env:$Secret -Value $SecretValue -Force | Out-Null
-                } 
-
-                Write-Verbose "Secret [$Secret] added to environment"
+            if ($UseSecureString) {
+                # Set Environment Variable using clear text
+                New-Item -Path Env:$Secret -Value (ConvertTo-SecureString -AsPlainText -Force -String $SecretValue ) -Force | Out-Null
             }
+            else {
+                # Set Environment Variable using secure string
+                New-Item -Path Env:$Secret -Value $SecretValue -Force | Out-Null
+            } 
 
-            # Store the secret names of the environment which is being loaded.
-            if ($Script:Vaults -notcontains $Name) {
-                $Script:Vaults += $Name  
-            }
-                      
+            Write-Verbose "Secret [$Secret] added to environment"
         }
 
-    }
-    Catch {              
-        Throw "$($_.Exception.Message)"
-    }
-  
-} 
+        # Store the secret names of the environment which is being loaded.
+        if ($Script:Vaults -notcontains $Name) {
+            $Script:Vaults += $Name  
+        }
+                      
+        
+    } 
