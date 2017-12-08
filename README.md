@@ -7,21 +7,19 @@ This module uses Azure Key Vault to securely store secrets and allows you to set
 # How to use
 This module uses azure cli to interact with azure. It's a very straight forward and fully supported way to interact with azure. It also makes this work cross platform!
 
-## Install Module and CLI
-First we need to install all required modules:
+## Requirements
+PSBuildSecrets has the following requirements:
+- Powershell 5.1 / 6.0.0-rc
+    - [How to get Powershell](https://github.com/PowerShell/PowerShell)
+- Azure CLI 2.0 +
+    - [How to get Azure CLI](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli)
+
+## How to use
+All commands are executed in a PowerShell session.
+### Setup Key Vault
+
 ```Powershell
-    # Open an elevated powershell prompt (you could also install it in user scope)
-    Install-Module PSBuildSecrets
 
-    # Install Azure CLI 2.x https://docs.microsoft.com/en-us/cli/azure/install-azure-cli
-
-
-```
-
-## Setup Secrets in Azure
-First you need to create a key vault in azure and store some secrets. The following example shows how to create two key vaults, one called "prod" the other one "staging".
-
-```Bash
 # Login to azure
 az login
 
@@ -51,6 +49,8 @@ az keyvault secret set --vault-name 'project2' --name 'my-secret-6' --value 'mys
 
 ```
 
+### Set Build Secrets
+
 ```Powershell
 
 # Install the PSBuildSecrets Module
@@ -69,6 +69,11 @@ VERBOSE: Secret [my-secret-3] added to environment
 VERBOSE: Secret [my-secret-4] added to environment
 VERBOSE: Secret [my-secret-5] added to environment
 VERBOSE: Secret [my-secret-6] added to environment
+```
+
+### Get Buils Secrets
+
+```Powershell
 
 # Get all build secrets in the environment
 Get-BuildSecrets
@@ -101,6 +106,9 @@ Name                           Value
 my-secret-1                    mysecretvalue
 my-secret-2                    mysecretvalue
 
+```
+### Remove Build Secrets
+```Powershell
 # remove project 1
 Remove-BuildSecrets 'project1'
 
@@ -114,12 +122,11 @@ my-secret-4                    mysecretvalue
 my-secret-5                    mysecretvalue
 my-secret-6                    mysecretvalue
 
-
-
 ```
 
 ## ToDo
 - Add support for certificates and keys
+- Add usage examples to help
 
 ## Credits
 
