@@ -8,35 +8,45 @@ function Remove-BuildSecrets {
         Allows the user to specify a subscription id if required. if not specified, the default subscription will be used.
 #>
 
-[CmdletBinding()]
-param (
-    [Parameter(Mandatory=$true,Position=1)]
-    [String[]]$KeyVaultName,
-    [Parameter(Mandatory=$false)]
-    [String]$SubscriptionID
-)
+    [CmdletBinding()]
+    param (
+        [Parameter(Mandatory = $true, Position = 1)]
+        [String[]]$KeyVaultName,
+        [Parameter(Mandatory = $false)]
+        [String]$SubscriptionID
+    )
 
     # Select the appropriate subscription
     if ($SubscriptionID) {
-        Select-AzureRmSubscription -SubscriptionId $SubscriptionID 
+        Invoke-Azcli -Arguments "account set -s $SubscriptionID"
     }
 
     # Get all secrets from specified vault's
     $Secrets = @()
     
     foreach ($Name in $KeyVaultName) { 
-        $Secrets += Get-AzureKeyVaultSecret -VaultName $KeyVaultName | Select-Object -ExpandProperty Name           
-    }
+       
+        $Secrets = Invoke-Azcli -Arguments "keyvault secret list --vault-name $Name" | ForEach-Object { Split-Path $_.id -Leaf }  
+   
+        foreach ($Secret in $Secrets) { 
 
-    foreach ($Secret in $Secrets) { 
-
-        try { 
-            # Set Environment Variable
-            Get-Item -Path Env:$Secret 
-        } catch {
-            Write-Output "Could not find secret [$Secret] in current environment"
-        }
+            $var = Get-Item -Path Env:$Secret -ErrorAction SilentlyContinue
+            
+            if ($var) {
+                # Set Environment Variable
+                Remove-Item -Path Env:$Secret
+            } else {
+                Write-Output "Could not find secret [$Secret] in current environment"
+            }
  
-    }   
+        }
+
+        # Remove vault from list of loaded vaults
+        if ($Script:Vaults -contains $Name) {
+            $Script:Vaults.Remove($Name)
+        }
+        
+    
+    }
 
 }

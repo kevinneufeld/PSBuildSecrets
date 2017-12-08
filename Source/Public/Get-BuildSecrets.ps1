@@ -4,25 +4,27 @@ function Get-BuildSecrets {
     Gets all secrets in the current environment
 .PARAMETER KeyVaultName
     The name of the key vault containing the environment
+.PARAMETER ShowValue
+    If specified the secret value will be written to the console
 .PARAMETER SubscriptionID
     Allows the user to specify a subscription id if required. if not specified, the default subscription will be used.
 #>
 
-[CmdletBinding()]
-param (
-    [Parameter(Mandatory=$false,Position=1)]
-    [String[]]$KeyVaultName,
-    [Parameter(Mandatory=$false)]
-    [String]$SubscriptionID
-)
+    [CmdletBinding()]
+    param (
+        [Parameter(Mandatory = $false, Position = 1)]
+        [String[]]$KeyVaultName,
+        [Parameter(Mandatory=$false)]
+        [Alias('s')]
+        [Switch]$ShowValue,
+        [Parameter(Mandatory = $false)]
+        [String]$SubscriptionID
+    )
 
     # Select the appropriate subscription
     if ($SubscriptionID) {
-        Select-AzureRmSubscription -SubscriptionId $SubscriptionID 
+        Invoke-Azcli -Arguments "account set -s $SubscriptionID"
     }
-
-    # Get all secrets from specified vault's
-    $Secrets = @()
 
     # If no key vault is specified, we just list the vaults already loaded
     if (-not $KeyVaultName) {
@@ -30,18 +32,26 @@ param (
     }
 
     foreach ($Name in $KeyVaultName) { 
-        $Secrets += Get-AzureKeyVaultSecret -VaultName $KeyVaultName | Select-Object -ExpandProperty Name           
-    }
+        
+        $Secrets = Invoke-Azcli -Arguments "keyvault secret list --vault-name $Name" | ForEach-Object { Split-Path $_.id -Leaf }          
 
-    foreach ($Secret in $Secrets) { 
+        foreach ($Secret in $Secrets) { 
 
-        try {
-            # Set Environment Variable
-            Get-Item -Path Env:$Secret 
-        } catch {
-            Write-Output "Could not find secret [$Secret] in current environment"
-        }
+            $var = Get-Item -Path Env:$Secret -ErrorAction SilentlyContinue
+
+            if ($var) {
+                if ($ShowValue) {
+                    # Set Environment Variable
+                    Get-Item -Path Env:$Secret
+                } else {
+                    Write-Output $Secret
+                }
+               
+            } else {
+                Write-Output "Could not find secret [$Secret] in current environment"
+            }
  
+        }
     }
    
 }

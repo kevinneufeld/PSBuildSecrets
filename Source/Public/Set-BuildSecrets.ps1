@@ -1,5 +1,5 @@
 function Set-BuildSecrets {
-        <#
+    <#
     .SYNOPSIS
         Sets all secrets stored in a specific key vault as environment variables.
     .DESCRIPTION
@@ -16,58 +16,55 @@ function Set-BuildSecrets {
     
     [CmdletBinding()]
     param (
-        [Parameter(Mandatory=$true)]
+        [Parameter(Mandatory = $true)]
         [String[]]$KeyVaultName,
-        [Parameter(Mandatory=$false)]
+        [Parameter(Mandatory = $false)]
         [String]$SubscriptionID,
-        [Parameter(Mandatory=$false)]
+        [Parameter(Mandatory = $false)]
         [Switch]$UseSecureString
-    )
-    
+    )    
 
-    Begin {
-        
-    }
-    Process {
+    try {         
 
-        try {         
-
-            # Select the appropriate subscription
-            if ($SubscriptionID) {
-                Select-AzureRmSubscription -SubscriptionId $SubscriptionID 
-            }
-
-            # Get all secrets from specified vault's
-            $Secrets = @()
-            
-            foreach ($Name in $KeyVaultName) { 
-                $Secrets += Get-AzureKeyVaultSecret -VaultName $KeyVaultName | Select-Object -ExpandProperty Name           
-            }
-                       
-            foreach ($Secret in $Secrets) {  
-        
-                # We get the secret from azure key vault
-                $SecretValue = Get-AzureKeyVaultSecret -VaultName $KeyVaultName -Name $Secret
-
-               if ($UseSecureString) {
-                    # Set Environment Variable using secure string
-                    New-Item -Path Env:$Secret -Value $SecretValue.SecretValue -Force
-               } else {
-                    # Set Environment Variable using clear text
-                    New-Item -Path Env:$Secret -Value $SecretValue.SecretValueText -Force
-               }    
-
-            }
-             # Store the secret names of the environment which is being loaded.
-             $Script:Vaults += $KeyVaultName
-
-        } Catch {              
-            Throw "$($_.Exception.Message)"
+        # Select the appropriate subscription
+        if ($SubscriptionID) {
+            Invoke-Azcli -Arguments "account set -s $SubscriptionID"
         }
-  
-    }
-    End {
-    
-    }
 
+        # Get all secrets from specified vault's
+        foreach ($Name in $KeyVaultName) {
+
+            Write-Verbose "Adding Secrets from Vault [$Name]"
+
+            $Secrets = Invoke-Azcli -Arguments "keyvault secret list --vault-name $Name" | ForEach-Object { Split-Path $_.id -Leaf }          
+                
+            foreach ($Secret in $Secrets) {  
+                    
+                # We get the secret from azure key vault
+                $SecretValue = Invoke-Azcli -Arguments "keyvault secret show --name $Secret --vault-name $Name" | Select-Object -ExpandProperty 'value'
+
+                if ($UseSecureString) {
+                    # Set Environment Variable using clear text
+                    New-Item -Path Env:$Secret -Value (ConvertTo-SecureString -AsPlainText -Force -String $SecretValue ) -Force | Out-Null
+                }
+                else {
+                    # Set Environment Variable using secure string
+                    New-Item -Path Env:$Secret -Value $SecretValue -Force | Out-Null
+                } 
+
+                Write-Verbose "Secret [$Secret] added to environment"
+            }
+
+            # Store the secret names of the environment which is being loaded.
+            if ($Script:Vaults -notcontains $Name) {
+                $Script:Vaults += $Name  
+            }
+                      
+        }
+
+    }
+    Catch {              
+        Throw "$($_.Exception.Message)"
+    }
+  
 } 

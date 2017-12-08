@@ -5,55 +5,121 @@ This module uses Azure Key Vault to securely store secrets and allows you to set
 
 
 # How to use
+This module uses azure cli to interact with azure. It's a very straight forward and fully supported way to interact with azure. It also makes this work cross platform!
 
-## Install Modules
+## Install Module and CLI
 First we need to install all required modules:
 ```Powershell
     # Open an elevated powershell prompt (you could also install it in user scope)
-    Install-Module PSBuildSecrets,AzureRM
+    Install-Module PSBuildSecrets
+
+    # Install Azure CLI 2.x https://docs.microsoft.com/en-us/cli/azure/install-azure-cli
+
+
 ```
 
 ## Setup Secrets in Azure
 First you need to create a key vault in azure and store some secrets. The following example shows how to create two key vaults, one called "prod" the other one "staging".
 
-```powershell
+```Bash
 # Login to azure
-Login-AzureRmAccount
+az login
 
 # Create a new resource group for your build secrets (Or use an existing group)
-New-AzureRmResourceGroup -Name 'BuildSecrets' -Location northeurope
+az group create -n 'BuildSecrets' -l 'northeurope'
+
+# Register the keyvault prvovider if not already done
+az provider register Microsoft.KeyVault
 
 # Create the key vault for staging
-$EnvironmentName = 'myenvironment-staging'
-
-New-AzureRmKeyVault -VaultName $EnvironmentName -ResourceGroupName 'BuildSecrets' -Location 'northeurope'
+az keyvault create -n 'project1' -g 'BuildSecrets' -l 'northeurope'
 
 # Set the secrets for the staging build environment
-Set-AzureKeyVaultSecret -VaultName $EnvironmentName -Name 'MySecret1' -SecretValue (ConvertTo-SecureString -String 'MySecretValue1' -AsPlainText -Force) -Tag @{ 'build-environment' = $EnvironmentName }
+az keyvault secret set --vault-name 'project1' --name 'my-secret-1' --value 'mysecretvalue'
+az keyvault secret set --vault-name 'project1' --name 'my-secret-2' --value 'mysecretvalue'
 
-Set-AzureKeyVaultSecret -VaultName $EnvironmentName -Name 'MySecret2' -SecretValue (ConvertTo-SecureString -String 'MySecretValue2' -AsPlainText -Force) -Tag @{ 'build-environment' = $EnvironmentName }
+# Create the key vault for staging
+az keyvault create -n 'project2' -g 'BuildSecrets' -l 'northeurope'
 
-# Create the key vault fpr prod
-$EnvironmentName = 'myenvironment-prod'
+# Set the secrets for the staging build environment
+az keyvault secret set --vault-name 'project2' --name 'my-secret-3' --value 'mysecretvalue'
+az keyvault secret set --vault-name 'project2' --name 'my-secret-4' --value 'mysecretvalue'
+az keyvault secret set --vault-name 'project2' --name 'my-secret-5' --value 'mysecretvalue'
+az keyvault secret set --vault-name 'project2' --name 'my-secret-6' --value 'mysecretvalue'
 
-New-AzureRmKeyVault -VaultName $EnvironmentName -ResourceGroupName 'BuildSecrets' -Location 'northeurope'
+# Note: The secret names accross projects should be unique if you want to load them at the same time. If there is a variable with the same name in two different vaults, as of today, the environment you load last, wins :)
 
-# Set the secrets for the prod build environment
-Set-AzureKeyVaultSecret -VaultName $EnvironmentName -Name 'MySecret1' -SecretValue (ConvertTo-SecureString -String 'MySecretValue1' -AsPlainText -Force) -Tag @{ 'build-environment' = $EnvironmentName }
+```
 
-Set-AzureKeyVaultSecret -VaultName $EnvironmentName -Name 'MySecret2' -SecretValue (ConvertTo-SecureString -String 'MySecretValue2' -AsPlainText -Force) -Tag @{ 'build-environment' = $EnvironmentName }
+```Powershell
 
 # Install the PSBuildSecrets Module
-Install-Module BuildSecrets
+Import-Module BuildSecrets
 
 # Set Build Secrets for myenvironment-prod
-Set-BuildSecrets 'myenvironment-prod'
+Set-BuildSecrets 'project1','project2' -Verbose
+
+VERBOSE: Adding Secrets from Vault [project1]
+VERBOSE: Secret [my-secret-1] added to environment
+VERBOSE: Secret [my-secret-2] added to environment
+VERBOSE: Adding Secrets from Vault [project2]
+VERBOSE: Secret [my-secret-1] added to environment
+VERBOSE: Secret [my-secret-2] added to environment
+VERBOSE: Secret [my-secret-3] added to environment
+VERBOSE: Secret [my-secret-4] added to environment
+VERBOSE: Secret [my-secret-5] added to environment
+VERBOSE: Secret [my-secret-6] added to environment
+
+# Get all build secrets in the environment
+Get-BuildSecrets
+
+my-secret-1
+my-secret-2
+my-secret-3
+my-secret-4
+my-secret-5
+my-secret-6
+
+
+# Get all build secrets in the environment and show values
+Get-BuildSecrets -s
+
+Name                           Value
+----                           -----
+my-secret-1                    mysecretvalue
+my-secret-2                    mysecretvalue
+my-secret-3                    mysecretvalue
+my-secret-4                    mysecretvalue
+my-secret-5                    mysecretvalue
+my-secret-6                    mysecretvalue
+
+# Show secrets from project 1
+Get-BuildSecrets 'project1'
+
+Name                           Value
+----                           -----
+my-secret-1                    mysecretvalue
+my-secret-2                    mysecretvalue
+
+# remove project 1
+Remove-BuildSecrets 'project1'
+
+# Check the environment
+Get-BuildSecrets -s
+
+Name                           Value
+----                           -----
+my-secret-3                    mysecretvalue
+my-secret-4                    mysecretvalue
+my-secret-5                    mysecretvalue
+my-secret-6                    mysecretvalue
+
 
 
 ```
 
 ## ToDo
-- Use Powershell Core and remove dependency on AzureRM (Cross Platform support)
+- Add support for certificates and keys
 
 ## Credits
 
