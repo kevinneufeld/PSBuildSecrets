@@ -17,22 +17,51 @@ function Set-BuildSecrets {
         [Parameter(Mandatory = $true)]
         [String[]]$KeyVaultName,
         [Parameter(Mandatory = $false)]
-        [String]$SubscriptionID,
-        [Parameter(Mandatory = $false)]
-        [Switch]$UseSecureString
+        [String]$SubscriptionID
     )           
+
+    # Check if we are logged in
+    $Results = Invoke-Azcli -Arguments "account list"
+    
+    if ($Results.Count -lt 1) {
+        throw "You must login first"    
+    }
 
     # Select the appropriate subscription
     if ($SubscriptionID) {
         Invoke-Azcli -Arguments "account set -s $SubscriptionID"
     }
 
+    $Results = Invoke-Azcli -Arguments "account show"
+
+    if ($Results.state -ne 'Enabled') {
+        throw "You must select a subscription"    
+    }
+
     # Get all secrets from specified vault's
     foreach ($Name in $KeyVaultName) {
 
-        Write-Verbose "Adding Secrets from Vault [$Name]"
+        $Results = Invoke-Azcli -Arguments "keyvault show --name $Name"
 
-        $Secrets = Invoke-Azcli -Arguments "keyvault secret list --vault-name $Name" | ForEach-Object { Split-Path $_.id -Leaf }          
+        if ($Results.name -ne $Name) {
+            throw "Key vault [$name] does not exists."
+        }
+
+        Write-Verbose "Adding Secrets from Vault [$Name]"       
+
+        $Results = Invoke-Azcli -Arguments "keyvault secret list --vault-name $Name"
+
+        if ($Results.Count -lt 1) {
+            Write-Verbose "No secrets found in vault [$Name]"
+        }
+
+        $Results = Invoke-Azcli -Arguments "keyvault secret list --vault-name $Name"
+        
+        $Secrets = @()
+
+        foreach ($Result in $Results) {
+            $Secrets += Split-Path $Result.id -Leaf
+        }       
         
         foreach ($Secret in $Secrets) {  
                     
@@ -43,13 +72,7 @@ function Set-BuildSecrets {
             New-Item -Path Env:$Secret -Value $SecretValue -Force | Out-Null            
 
             Write-Verbose "Secret [$Secret] added to environment"
-        }
-
-        # Store the secret names of the environment which is being loaded.
-        if ($Script:Vaults -notcontains $Name) {
-            $Script:Vaults += $Name  
-        }
-                      
+        }        
         
     } 
 

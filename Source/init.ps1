@@ -6,5 +6,3 @@
 #Set Module root path for later reference
 $PSModuleRoot = $PSScriptRoot
 
-# Stores the names of all loaded vaults
-$Vaults = @()

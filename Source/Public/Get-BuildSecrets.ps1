@@ -12,7 +12,7 @@ function Get-BuildSecrets {
 
     [CmdletBinding()]
     param (
-        [Parameter(Mandatory = $false, Position = 1)]
+        [Parameter(Mandatory = $true, Position = 1)]
         [String[]]$KeyVaultName,
         [Parameter(Mandatory=$false)]
         [Alias('s')]
@@ -21,21 +21,48 @@ function Get-BuildSecrets {
         [String]$SubscriptionID
     )
 
-    # Select the appropriate subscription
-    if ($SubscriptionID) {
-        Invoke-Azcli -Arguments "account set -s $SubscriptionID"
-    }
+   # Check if we are logged in
+   $Results = Invoke-Azcli -Arguments "account list"
+   
+   if ($Results.Count -lt 1) {
+       throw "You must login first"    
+   }
 
-    # If no key vault is specified, we just list the vaults already loaded
-    if (-not $KeyVaultName) {
-        $KeyVaultName = $Script:Vaults
-    }
+   # Select the appropriate subscription
+   if ($SubscriptionID) {
+       Invoke-Azcli -Arguments "account set -s $SubscriptionID"
+   }
+
+   $Results = Invoke-Azcli -Arguments "account show"
+
+   if ($Results.state -ne 'Enabled') {
+       throw "You must select a subscription"    
+   }
 
     foreach ($Name in $KeyVaultName) { 
+        $Results = Invoke-Azcli -Arguments "keyvault show --name $Name"
         
-        $Secrets = Invoke-Azcli -Arguments "keyvault secret list --vault-name $Name" | ForEach-Object { Split-Path $_.id -Leaf }          
+        if ($Results.name -ne $Name) {
+            throw "Key vault [$name] does not exists."
+        }
 
-        foreach ($Secret in $Secrets) { 
+        Write-Verbose "Getting Secrets from Vault [$Name]"       
+
+        $Results = Invoke-Azcli -Arguments "keyvault secret list --vault-name $Name"
+
+        if ($Results.Count -lt 1) {
+            Write-Verbose "No secrets found in vault [$Name]"
+        }
+
+        $Results = Invoke-Azcli -Arguments "keyvault secret list --vault-name $Name"
+        
+        $Secrets = @()
+
+        foreach ($Result in $Results) {
+            $Secrets += Split-Path $Result.id -Leaf
+        }       
+        
+        foreach ($Secret in $Secrets) {  
 
             $var = Get-Item -Path Env:$Secret -ErrorAction SilentlyContinue
 
