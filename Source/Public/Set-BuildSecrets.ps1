@@ -8,8 +8,6 @@ function Set-BuildSecrets {
         The name of the key vault containing the environment
     .PARAMETER SubscriptionID
             Allows the user to specify a subscription id if required. if not specified, the default subscription will be used.    
-    .PARAMETER UseSecureString
-        If specified the securestring version of the secrets will be stored in the environment.
     .EXAMPLE
         Set-BuildEnvironment -KeyVaultName "MyVault" -ResourceGroupName "MyResourceGroup"
     #>    
@@ -22,9 +20,7 @@ function Set-BuildSecrets {
         [String]$SubscriptionID,
         [Parameter(Mandatory = $false)]
         [Switch]$UseSecureString
-    )    
-
-       
+    )           
 
     # Select the appropriate subscription
     if ($SubscriptionID) {
@@ -43,14 +39,8 @@ function Set-BuildSecrets {
             # We get the secret from azure key vault
             $SecretValue = Invoke-Azcli -Arguments "keyvault secret show --name $Secret --vault-name $Name" | Select-Object -ExpandProperty 'value'
 
-            if ($UseSecureString) {
-                # Set Environment Variable using clear text
-                New-Item -Path Env:$Secret -Value (ConvertTo-SecureString -AsPlainText -Force -String $SecretValue ) -Force | Out-Null
-            }
-            else {
-                # Set Environment Variable using secure string
-                New-Item -Path Env:$Secret -Value $SecretValue -Force | Out-Null
-            } 
+            # Set Environment Variable 
+            New-Item -Path Env:$Secret -Value $SecretValue -Force | Out-Null            
 
             Write-Verbose "Secret [$Secret] added to environment"
         }
@@ -62,3 +52,5 @@ function Set-BuildSecrets {
                       
         
     } 
+
+}
