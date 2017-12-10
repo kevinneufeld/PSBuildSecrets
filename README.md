@@ -33,6 +33,9 @@ az provider register Microsoft.KeyVault
 az keyvault create -n 'project1' -g 'BuildSecrets' -l 'northeurope'
 
 # Set the secrets for the staging build environment
+
+# IMPORTANT: The - character in the variable name will automatically be replaced with the _ character 
+#            when set in a environent as environment variable. my-secret-1 would be my_secret_1.
 az keyvault secret set --vault-name 'project1' --name 'my-secret-1' --value 'mysecretvalue'
 az keyvault secret set --vault-name 'project1' --name 'my-secret-2' --value 'mysecretvalue'
 
@@ -60,15 +63,15 @@ Import-Module BuildSecrets
 Set-BuildSecrets 'project1','project2' -Verbose
 
 VERBOSE: Adding Secrets from Vault [project1]
-VERBOSE: Secret [my-secret-1] added to environment
-VERBOSE: Secret [my-secret-2] added to environment
+VERBOSE: Secret [my_secret_1] added to environment
+VERBOSE: Secret [my_secret_2] added to environment
 VERBOSE: Adding Secrets from Vault [project2]
-VERBOSE: Secret [my-secret-1] added to environment
-VERBOSE: Secret [my-secret-2] added to environment
-VERBOSE: Secret [my-secret-3] added to environment
-VERBOSE: Secret [my-secret-4] added to environment
-VERBOSE: Secret [my-secret-5] added to environment
-VERBOSE: Secret [my-secret-6] added to environment
+VERBOSE: Secret [my_secret_1] added to environment
+VERBOSE: Secret [my_secret_2] added to environment
+VERBOSE: Secret [my_secret_3] added to environment
+VERBOSE: Secret [my_secret_4] added to environment
+VERBOSE: Secret [my_secret_5] added to environment
+VERBOSE: Secret [my_secret_6] added to environment
 ```
 
 ### Get Buils Secrets
@@ -78,12 +81,12 @@ VERBOSE: Secret [my-secret-6] added to environment
 # Get all build secrets in the environment
 Get-BuildSecrets
 
-my-secret-1
-my-secret-2
-my-secret-3
-my-secret-4
-my-secret-5
-my-secret-6
+my_secret_1
+my_secret_2
+my_secret_3
+my_secret_4
+my_secret_5
+my_secret_6
 
 
 # Get all build secrets in the environment and show values
@@ -91,20 +94,20 @@ Get-BuildSecrets -s
 
 Name                           Value
 ----                           -----
-my-secret-1                    mysecretvalue
-my-secret-2                    mysecretvalue
-my-secret-3                    mysecretvalue
-my-secret-4                    mysecretvalue
-my-secret-5                    mysecretvalue
-my-secret-6                    mysecretvalue
+my_secret_1                    mysecretvalue
+my_secret_2                    mysecretvalue
+my_secret_3                    mysecretvalue
+my_secret_4                    mysecretvalue
+my_secret_5                    mysecretvalue
+my_secret_6                    mysecretvalue
 
 # Show secrets from project 1
 Get-BuildSecrets 'project1'
 
 Name                           Value
 ----                           -----
-my-secret-1                    mysecretvalue
-my-secret-2                    mysecretvalue
+my_secret_1                    mysecretvalue
+my_secret_2                    mysecretvalue
 
 ```
 ### Remove Build Secrets
@@ -117,10 +120,10 @@ Get-BuildSecrets -s
 
 Name                           Value
 ----                           -----
-my-secret-3                    mysecretvalue
-my-secret-4                    mysecretvalue
-my-secret-5                    mysecretvalue
-my-secret-6                    mysecretvalue
+my_secret_3                    mysecretvalue
+my_secret_4                    mysecretvalue
+my_secret_5                    mysecretvalue
+my_secret_6                    mysecretvalue
 
 ```
 

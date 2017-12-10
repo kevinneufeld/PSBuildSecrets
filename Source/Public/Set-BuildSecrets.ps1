@@ -3,7 +3,9 @@ function Set-BuildSecrets {
     .SYNOPSIS
         Sets all secrets stored in a specific key vault as environment variables.
     .DESCRIPTION
-        Sets all secrets stored in a specific key vault as environment variables. The user has to login to azure first using "Login-AzureRMAccount" 
+        Sets all secrets stored in a specific key vault as environment variables. The user has to login to azure first using "az login"
+
+        Important: The - character will automatically be replaced with the _ character.
     .PARAMETER KeyVaultName
         The name of the key vault containing the environment
     .PARAMETER SubscriptionID
@@ -68,10 +70,13 @@ function Set-BuildSecrets {
             # We get the secret from azure key vault
             $SecretValue = Invoke-Azcli -Arguments "keyvault secret show --name $Secret --vault-name $Name" | Select-Object -ExpandProperty 'value'
 
+            # Replace - with _
+            $Secret = $($Secret.Replace('-','_'))
+
             # Set Environment Variable 
             New-Item -Path Env:$Secret -Value $SecretValue -Force | Out-Null            
 
-            Write-Verbose "Secret [$Secret] added to environment"
+            Write-Verbose "Secret [$($Secret.Replace('-','_'))] added to environment"
         }        
         
     } 

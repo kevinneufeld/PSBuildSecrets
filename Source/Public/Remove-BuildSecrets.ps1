@@ -1,7 +1,11 @@
 function Remove-BuildSecrets {
     <#
 .SYNOPSIS
-    Removes all variables from the specified key vault from the current environment
+    Removes all variables of the specified key vault from the current environment
+.DESCRIPTION
+        Removes all variables of the specified key vault from the current environment. The user has to login to azure first using "az login"
+
+    Important: The - character will automatically be replaced with the _ character.
 .PARAMETER KeyVaultName
     The name of the key vault containing the environment
 .PARAMETER SubscriptionID
@@ -62,6 +66,10 @@ function Remove-BuildSecrets {
         }       
         
         foreach ($Secret in $Secrets) {  
+
+            # Replace - with _
+            $Secret = $($Secret.Replace('-','_'))
+
             $var = Get-Item -Path Env:$Secret -ErrorAction SilentlyContinue
             
             if ($var) {

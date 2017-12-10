@@ -1,7 +1,11 @@
 function Get-BuildSecrets {
     <#
 .SYNOPSIS
-    Gets all secrets in the current environment
+    Gets all secrets currently set in the environment
+.DESCRIPTION
+    Gets all secrets currently set in the environment. The user has to login to azure first using "az login"
+
+    Important: The - character will automatically be replaced with the _ character.
 .PARAMETER KeyVaultName
     The name of the key vault containing the environment
 .PARAMETER ShowValue
@@ -63,6 +67,9 @@ function Get-BuildSecrets {
         }       
         
         foreach ($Secret in $Secrets) {  
+
+            # Replace - with _
+            $Secret = $($Secret.Replace('-','_'))
 
             $var = Get-Item -Path Env:$Secret -ErrorAction SilentlyContinue
 
