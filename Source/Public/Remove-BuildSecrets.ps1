@@ -20,13 +20,6 @@ function Remove-BuildSecrets {
         [String]$SubscriptionID
     )
 
-    # Check if we are logged in
-    $Results = Invoke-Azcli -Arguments "account list"
-
-    if ($Results.Count -lt 1) {
-        throw "You must login first"    
-    }
-
     # Select the appropriate subscription
     if ($SubscriptionID) {
         Invoke-Azcli -Arguments "account set -s $SubscriptionID"
@@ -35,9 +28,8 @@ function Remove-BuildSecrets {
     $Results = Invoke-Azcli -Arguments "account show"
 
     if ($Results.state -ne 'Enabled') {
-        throw "You must select a subscription"    
+        throw "You must login and select a subscription"   
     }
-
     # Get all secrets from specified vault's
     $Secrets = @()
     

@@ -25,23 +25,16 @@ function Get-BuildSecrets {
         [String]$SubscriptionID
     )
 
-   # Check if we are logged in
-   $Results = Invoke-Azcli -Arguments "account list"
-   
-   if ($Results.Count -lt 1) {
-       throw "You must login first"    
-   }
+      # Select the appropriate subscription
+      if ($SubscriptionID) {
+        Invoke-Azcli -Arguments "account set -s $SubscriptionID"
+    }
 
-   # Select the appropriate subscription
-   if ($SubscriptionID) {
-       Invoke-Azcli -Arguments "account set -s $SubscriptionID"
-   }
+    $Results = Invoke-Azcli -Arguments "account show"
 
-   $Results = Invoke-Azcli -Arguments "account show"
-
-   if ($Results.state -ne 'Enabled') {
-       throw "You must select a subscription"    
-   }
+    if ($Results.state -ne 'Enabled') {
+        throw "You must login and select a subscription"   
+    }
 
     foreach ($Name in $KeyVaultName) { 
         $Results = Invoke-Azcli -Arguments "keyvault show --name $Name"
