@@ -8,6 +8,8 @@ function Set-BuildSecrets {
         Important: The - character will automatically be replaced with the _ character.
     .PARAMETER KeyVaultName
         The name of the key vault containing the environment
+    .PARAMETER SecretName
+        If specified only the value of the secret with the specified name will be set.
     .PARAMETER SubscriptionID
             Allows the user to specify a subscription id if required. if not specified, the default subscription will be used.    
     .EXAMPLE
@@ -18,6 +20,8 @@ function Set-BuildSecrets {
     param (
         [Parameter(Mandatory = $true)]
         [String[]]$KeyVaultName,
+        [Parameter(Mandatory = $false)]
+        [String]$SecretName,
         [Parameter(Mandatory = $false)]
         [String]$SubscriptionID
     )           
@@ -44,13 +48,18 @@ function Set-BuildSecrets {
 
         Write-Verbose "Adding Secrets from Vault [$Name]"       
 
-        $Results = Invoke-Azcli -Arguments "keyvault secret list --vault-name $Name"
+        $QueryString = "keyvault secret list --vault-name $Name"
+
+        if ($SecretName) {
+            # We replace all underscores with a dash... just in case somebody wants to reference the variable name rather than the secret name...
+            $QueryString += ' --query "[?contains(id, `{0}`)]"' -f $($SecretName.Replace('_','-'))
+        }
+
+        $Results = Invoke-Azcli -Arguments $QueryString
 
         if ($Results.Count -lt 1) {
             Write-Verbose "No secrets found in vault [$Name]"
         }
-
-        $Results = Invoke-Azcli -Arguments "keyvault secret list --vault-name $Name"
         
         $Secrets = @()
 

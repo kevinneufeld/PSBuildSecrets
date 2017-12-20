@@ -18,6 +18,8 @@ function Get-BuildSecrets {
     param (
         [Parameter(Mandatory = $true, Position = 1)]
         [String[]]$KeyVaultName,
+        [Parameter(Mandatory = $false)]
+        [String]$SecretName,
         [Parameter(Mandatory=$false)]
         [Alias('s')]
         [Switch]$ShowValue,
@@ -45,13 +47,18 @@ function Get-BuildSecrets {
 
         Write-Verbose "Getting Secrets from Vault [$Name]"       
 
-        $Results = Invoke-Azcli -Arguments "keyvault secret list --vault-name $Name"
+        $QueryString = "keyvault secret list --vault-name $Name"
+
+        if ($SecretName) {
+            # We replace all underscores with a dash... just in case somebody wants to reference the variable name rather than the secret name...
+            $QueryString += ' --query "[?contains(id, `{0}`)]"' -f $($SecretName.Replace('_','-'))
+        }
+
+        $Results = Invoke-Azcli -Arguments $QueryString
 
         if ($Results.Count -lt 1) {
             Write-Verbose "No secrets found in vault [$Name]"
         }
-
-        $Results = Invoke-Azcli -Arguments "keyvault secret list --vault-name $Name"
         
         $Secrets = @()
 
