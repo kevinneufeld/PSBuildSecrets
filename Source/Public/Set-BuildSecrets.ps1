@@ -28,10 +28,10 @@ function Set-BuildSecrets {
 
     # Select the appropriate subscription
     if ($SubscriptionID) {
-        Invoke-Azcli -Arguments "account set -s $SubscriptionID"
+        Invoke-Azcli -ArgumentList "account set -s $SubscriptionID"
     }
 
-    $Results = Invoke-Azcli -Arguments "account show"
+    $Results = Invoke-Azcli -ArgumentList "account show"
 
     if ($Results.state -ne 'Enabled') {
         throw "You must login and select a subscription"   
@@ -40,7 +40,7 @@ function Set-BuildSecrets {
     # Get all secrets from specified vault's
     foreach ($Name in $KeyVaultName) {
 
-        $Results = Invoke-Azcli -Arguments "keyvault show --name $Name"
+        $Results = Invoke-Azcli -ArgumentList "keyvault show --name $Name"
 
         if ($Results.name -ne $Name) {
             throw "Key vault [$name] does not exists."
@@ -55,7 +55,7 @@ function Set-BuildSecrets {
             $QueryString += ' --query "[?contains(id, `{0}`)]"' -f $($SecretName.Replace('_','-'))
         }
 
-        $Results = Invoke-Azcli -Arguments $QueryString
+        $Results = Invoke-Azcli -ArgumentList $QueryString
 
         if ($Results.Count -lt 1) {
             Write-Verbose "No secrets found in vault [$Name]"
@@ -70,7 +70,7 @@ function Set-BuildSecrets {
         foreach ($Secret in $Secrets) {  
                     
             # We get the secret from azure key vault
-            $SecretValue = Invoke-Azcli -Arguments "keyvault secret show --name $Secret --vault-name $Name" | Select-Object -ExpandProperty 'value'
+            $SecretValue = Invoke-Azcli -ArgumentList "keyvault secret show --name $Secret --vault-name $Name" | Select-Object -ExpandProperty 'value'
 
             # Replace - with _
             $Secret = $($Secret.Replace('-','_'))
@@ -79,7 +79,9 @@ function Set-BuildSecrets {
             New-Item -Path Env:$Secret -Value $SecretValue -Force | Out-Null            
 
             Write-Verbose "Secret [$($Secret.Replace('-','_'))] added to environment"
-        }        
+        }
+
+        Write-Output "[$($Secrets.Count)] secrets added to environment"
         
     } 
 

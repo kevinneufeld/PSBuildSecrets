@@ -29,17 +29,17 @@ function Get-BuildSecrets {
 
       # Select the appropriate subscription
       if ($SubscriptionID) {
-        Invoke-Azcli -Arguments "account set -s $SubscriptionID"
+        Invoke-Azcli -ArgumentList "account set -s $SubscriptionID"
     }
 
-    $Results = Invoke-Azcli -Arguments "account show"
+    $Results = Invoke-Azcli -ArgumentList "account show"
 
     if ($Results.state -ne 'Enabled') {
         throw "You must login and select a subscription"   
     }
 
     foreach ($Name in $KeyVaultName) { 
-        $Results = Invoke-Azcli -Arguments "keyvault show --name $Name"
+        $Results = Invoke-Azcli -ArgumentList "keyvault show --name $Name"
         
         if ($Results.name -ne $Name) {
             throw "Key vault [$name] does not exists."
@@ -54,7 +54,7 @@ function Get-BuildSecrets {
             $QueryString += ' --query "[?contains(id, `{0}`)]"' -f $($SecretName.Replace('_','-'))
         }
 
-        $Results = Invoke-Azcli -Arguments $QueryString
+        $Results = Invoke-Azcli -ArgumentList $QueryString
 
         if ($Results.Count -lt 1) {
             Write-Verbose "No secrets found in vault [$Name]"

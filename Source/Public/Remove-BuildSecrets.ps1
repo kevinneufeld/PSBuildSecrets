@@ -22,10 +22,10 @@ function Remove-BuildSecrets {
 
     # Select the appropriate subscription
     if ($SubscriptionID) {
-        Invoke-Azcli -Arguments "account set -s $SubscriptionID"
+        Invoke-Azcli -ArgumentList "account set -s $SubscriptionID"
     }
 
-    $Results = Invoke-Azcli -Arguments "account show"
+    $Results = Invoke-Azcli -ArgumentList "account show"
 
     if ($Results.state -ne 'Enabled') {
         throw "You must login and select a subscription"   
@@ -35,7 +35,7 @@ function Remove-BuildSecrets {
     
     foreach ($Name in $KeyVaultName) { 
 
-        $Results = Invoke-Azcli -Arguments "keyvault show --name $Name"
+        $Results = Invoke-Azcli -ArgumentList "keyvault show --name $Name"
         
         if ($Results.name -ne $Name) {
             throw "Key vault [$name] does not exists."
@@ -43,13 +43,13 @@ function Remove-BuildSecrets {
 
         Write-Verbose "Removing Secrets from Vault [$Name]"       
 
-        $Results = Invoke-Azcli -Arguments "keyvault secret list --vault-name $Name"
+        $Results = Invoke-Azcli -ArgumentList "keyvault secret list --vault-name $Name"
 
         if ($Results.Count -lt 1) {
             Write-Verbose "No secrets found in vault [$Name]"
         }
 
-        $Results = Invoke-Azcli -Arguments "keyvault secret list --vault-name $Name"
+        $Results = Invoke-Azcli -ArgumentList "keyvault secret list --vault-name $Name"
         
         $Secrets = @()
 
