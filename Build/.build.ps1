@@ -59,7 +59,7 @@ task test {
         }
     
         # Gather test results. Store them in a variable and file
-        $TestResults = Invoke-Pester -Path $ENV:BHProjectRoot\Tests -PassThru -OutputFormat NUnitXml -OutputFile (Join-Path $ENV:BHTestResultTargetPath $ENV:BHTestFile)
+        $TestResults = Invoke-Gherkin -Path $ENV:BHProjectRoot\Tests -PassThru -OutputFormat NUnitXml -OutputFile (Join-Path $ENV:BHTestResultTargetPath $ENV:BHTestFile)
 
         # In Appveyor?  Upload our tests! #Abstract this into a function?
         If($ENV:BHBuildSystem -eq 'AppVeyor')

@@ -10,6 +10,7 @@
 
     'powershell-yaml' = 'latest'
     BuildHelpers = 'latest'
+    'Pester' = 'latest'
 
 
   # File
