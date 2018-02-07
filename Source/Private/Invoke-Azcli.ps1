@@ -20,12 +20,10 @@ function Invoke-Azcli {
         $Params['Parameters'] = $PSBoundParameters['ArgumentList']
     }
     
-    if ($PSBoundParameters['Verbose']){
-        $Params['Attach'] = $true
-    }
+    $CommandPath = Get-Command -Name az | Select-Object -First -ExpandProperty Source
 
-     # Invoke Terraform and process result
-     $Result = Invoke-Process -PassThru -Path 'az' @Params -CreateNoWindow
+    # Invoke azure cli and process result
+     $Result = Invoke-Process -Path $CommandPath @Params
 
      if ($Result.ExitCode -ne 0) {
           throw "StdErr: $($Result.StdErr)`nStdOut: $($Result.StdOut)`nExitCode: $($Result.ExitCode)"
