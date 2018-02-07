@@ -20,7 +20,7 @@ function Invoke-Azcli {
         $Params['Parameters'] = $PSBoundParameters['ArgumentList']
     }
     
-    $CommandPath = Get-Command -Name az | Select-Object -First -ExpandProperty Source
+    $CommandPath = Get-Command -Name az | Select-Object -First 1 -ExpandProperty Source
 
     # Invoke azure cli and process result
      $Result = Invoke-Process -Path $CommandPath @Params
