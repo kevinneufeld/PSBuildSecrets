@@ -13,17 +13,10 @@ function Invoke-Azcli {
         [String[]]$ArgumentList
     )
 
-
-    $Params = @{}
-
-    if ($PSBoundParameters['ArgumentList']) {
-        $Params['Parameters'] = $PSBoundParameters['ArgumentList']
-    }
-    
     $CommandPath = Get-Command -Name az | Select-Object -First 1 -ExpandProperty Source
 
     # Invoke azure cli and process result
-     $Result = Invoke-Process -Path $CommandPath @Params
+     $Result = Invoke-Process -Path $CommandPath @PSBoundParameters
 
      if ($Result.ExitCode -ne 0) {
           throw "StdErr: $($Result.StdErr)`nStdOut: $($Result.StdOut)`nExitCode: $($Result.ExitCode)"
