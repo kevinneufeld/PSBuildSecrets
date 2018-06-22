@@ -1,5 +1,5 @@
 # PSBuildSecrets
-This module uses Azure Key Vault to securely store secrets and allows you to set them as encironment variables using a single command.
+This module uses Azure Key Vault to securely store secrets and allows you to set them as environment variables using a single command.
 
 [![Build status](https://ci.appveyor.com/api/projects/status/o2q8w3iqi58ouuwy?svg=true)](https://ci.appveyor.com/project/synax/psbuildsecrets)
 
